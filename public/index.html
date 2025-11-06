@@ -55,8 +55,11 @@
 </head>
 <body>
   <div id="login">
-    <h1>클릭 랭킹 게임</h1>
-    <p>이름을 입력하고 클릭 게임을 시작하세요!</p>
+    <!-- PCRC 로고 -->
+    <img src="/pcrc_logo.png" alt="PCRC" width="300" style="border-radius:15px; margin:20px;">
+    
+    <h1>PCRC 실시간 클릭 랭킹!!</h1>
+    <p>이름을 입력하고 클릭 경쟁을 시작하세요!</p>
     <input type="text" id="username" placeholder="이름 입력" autofocus>
     <br>
     <button onclick="login()">로그인</button>
@@ -71,10 +74,9 @@
     <ul id="rankingList"></ul>
   </div>
 
-  <!-- Socket.IO 자동 로드 (Render에서도 작동) -->
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io();  // 자동으로 현재 호스트 연결
+    const socket = io();
     let myUsername = '';
 
     function login() {
