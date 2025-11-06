@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>실시간 클릭 랭킹</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      text-align: center; 
+      margin: 40px; 
+      background: #f7f9fc;
+    }
+    #login, #game { 
+      max-width: 500px; 
+      margin: 0 auto; 
+      background: white; 
+      padding: 30px; 
+      border-radius: 16px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    input { 
+      padding: 12px; 
+      font-size: 16px; 
+      width: 220px; 
+      border: 1px solid #ccc; 
+      border-radius: 8px;
+    }
+    button { 
+      padding: 12px 28px; 
+      font-size: 18px; 
+      margin: 15px 8px; 
+      background: #4CAF50; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer;
+    }
+    button:hover { background: #45a049; }
+    #rankingList { 
+      list-style: none; 
+      padding: 0; 
+      margin-top: 20px;
+    }
+    li { 
+      padding: 12px; 
+      font-size: 18px; 
+      border-bottom: 1px solid #eee; 
+      background: #f9f9f9;
+      margin: 5px 0;
+      border-radius: 8px;
+    }
+    .me { color: #2196F3; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="login">
+    <h1>클릭 랭킹 게임</h1>
+    <p>이름을 입력하고 클릭 경쟁을 시작하세요!</p>
+    <input type="text" id="username" placeholder="이름 입력" autofocus>
+    <br>
+    <button onclick="login()">로그인</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <h1><span id="userDisplay"></span>님, 클릭!</h1>
+    <button onclick="clickButton()" style="font-size:24px; padding:20px 40px;">클릭!</button>
+    <p style="font-size:20px;">내 클릭 수: <strong id="myClicks">0</strong></p>
+
+    <h2>실시간 랭킹</h2>
+    <ul id="rankingList"></ul>
+  </div>
+
+  <!-- Socket.IO 자동 로드 (Render에서도 작동) -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();  // 자동으로 현재 호스트 연결
+    let myUsername = '';
+
+    function login() {
+      myUsername = document.getElementById('username').value.trim();
+      if (!myUsername) {
+        alert('이름을 입력해주세요!');
+        return;
+      }
+      socket.emit('login', myUsername);
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('game').style.display = 'block';
+      document.getElementById('userDisplay').textContent = myUsername;
+    }
+
+    function clickButton() {
+      socket.emit('click');
+    }
+
+    socket.on('updateRanking', (ranking) => {
+      const list = document.getElementById('rankingList');
+      list.innerHTML = '';
+      ranking.forEach((user, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${i + 1}위</strong>: ${user.username} - ${user.clicks}회`;
+        if (user.username === myUsername) {
+          li.classList.add('me');
+        }
+        list.appendChild(li);
+      });
+      const me = ranking.find(u => u.username === myUsername);
+      if (me) {
+        document.getElementById('myClicks').textContent = me.clicks;
+      }
+    });
+  </script>
+</body>
+</html>
